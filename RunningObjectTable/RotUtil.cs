@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 
@@ -40,6 +42,21 @@ namespace RunningObjectTable
 
             enumMoniker.Reset();
             return enumMoniker;
+        }
+
+        public static IEnumerable<string> GetRunningObjectNames()
+        {
+            var enumMoniker = GetEnumMoniker();
+
+            IMoniker[] monikers = new IMoniker[1];
+            while (enumMoniker.Next(1, monikers, IntPtr.Zero) == 0)
+            {
+                var ctx = CreateBindCtx();
+                var moniker = monikers[0];
+
+                moniker.GetDisplayName(ctx, null, out string name);
+                yield return name;
+            }
         }
 
         public static bool IsRunning(string progID)
